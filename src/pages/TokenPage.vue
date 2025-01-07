@@ -41,18 +41,18 @@ const router = useRouter()
 
 const saveToken = async () => {
   const ts = useTokenStore()
-  ts.token = token.value
-  ts.account = account.value
   // TODO: make a fetch to get account balance as a test to see if token is correct
-  const acct = await apiFetch(`https://api.tradier.com/v1/accounts/${ts.account}/balances`, {
+  const acct = await apiFetch(`https://api.tradier.com/v1/accounts/${account.value}/balances`, {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${ts.token}`,
+      Authorization: `Bearer ${token.value}`,
       Accept: 'application/json',
     },
   })
   if (acct !== null) {
     console.debug({ acct })
+    ts.token = token.value
+    ts.account = account.value
     router.push('Home')
   } else Notify.create('Token Issue')
 }
