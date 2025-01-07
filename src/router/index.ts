@@ -1,11 +1,12 @@
-import { defineRouter } from '#q-app/wrappers';
+import { defineRouter } from '#q-app/wrappers'
 import {
   createMemoryHistory,
   createRouter,
   createWebHashHistory,
   createWebHistory,
-} from 'vue-router';
-import routes from './routes';
+} from 'vue-router'
+import routes from './routes'
+import { useTokenStore } from 'src/stores/token-store'
 
 /*
  * If not building with SSR mode, you can
@@ -19,7 +20,9 @@ import routes from './routes';
 export default defineRouter(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
+    : process.env.VUE_ROUTER_MODE === 'history'
+      ? createWebHistory
+      : createWebHashHistory
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -29,7 +32,14 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
-  });
+  })
 
-  return Router;
-});
+  Router.beforeEach((to, from, next) => {
+    const tokenStore = useTokenStore()
+    if (tokenStore.token === null && to.name !== 'Token') {
+      next({ name: 'Token' })
+    } else next()
+  })
+
+  return Router
+})
